@@ -39,7 +39,6 @@ def get_total_pages() -> int:
     pages = pagination.find_all('li')
     for item in pages:
         paginate = item.find('a').text.strip()
-        print(paginate)
         total_pages.append(int(paginate))
 
     # get max total Pages
@@ -49,12 +48,30 @@ def get_total_pages() -> int:
 
 
 def get_all_items():
-    pass
+    params: dict = {
+        '_from': 'R40',
+        '_trksid': 'p2380057.m570.l1313',
+        '_nkw': 'iphone'.replace(' ', '+'),
+        '_sacat': '0',
+    }
 
+    url: str = 'https://www.ebay.com/sch/i.html?'
+    res = requests.get(url=url, params=params, headers=headers)
+    f = open('temp/res.html', 'w+')
+    f.write(res.text)
+    f.close()
 
-def get_detail():
-    pass
+    # scraping process
+    soup: BeautifulSoup = BeautifulSoup(res.text, 'html.parser')
+    srp_result = soup.find('ul', attrs={'class': 'srp-results srp-list clearfix'})
+    contents = srp_result.find_all('li', attrs={'class': 's-item s-item__sep-on-bottom'})
+    for content in contents:
+        title = content.find('h3', attrs={'class': 's-item__title'}).text
+        image = content.find('img', attrs={'class': 's-item__image-img'})['src']
+        link = content.find('a', attrs={'class': 's-item__link'})['href']
+        price = content.find('span', attrs={'class': 's-item__price'}).text.strip()
+        print(price)
 
 
 if __name__ == '__main__':
-    get_total_pages()
+    get_all_items()
